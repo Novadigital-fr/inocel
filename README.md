@@ -15,8 +15,38 @@ cd refonte && python3 -m http.server 8099   # → http://localhost:8099
 |---|---|
 | Version actuelle | `index.html` — langage visuel inspiré de [forfuture.webflow.io](https://forfuture.webflow.io/homepage/home-b) |
 | Version précédente | `v1/index.html` — conservée pour comparaison |
+| Variante V3 | `v3/index.html` — mécaniques d'animation inspirées de [serverobotics.com](https://www.serverobotics.com/) |
 
-Les deux partagent `assets/`.
+`index.html` et `v1/` partagent `assets/` ; `v3/` a sa propre copie pour rester autonome.
+
+### V3 : ce qui a été repris, et ce qui ne l'a pas été
+
+Le site de référence est un React Router/Remix maison avec Sanity : **aucune librairie
+d'animation** (ni GSAP, ni Lenis). Tout est écrit à la main, donc entièrement
+reproductible ici en JS/CSS natif.
+
+Repris — uniquement des **mécaniques**, jamais de contenu ni de visuel :
+
+| Effet | Où |
+|---|---|
+| Nav en pilule flottante à séparateurs | header |
+| Hero vidéo plein cadre + bouton pause | hero |
+| Texte qui s'allume mot à mot au scroll | section « statement » |
+| Image produit épinglée, texte qui défile à côté | section produit |
+| Piste de progression verticale + marqueur mobile | section bénéfices |
+| Boutons scindés (libellé + flèche) | partout |
+| Étiquettes entre parenthèses, crochets d'angle, halos flous | partout |
+
+Contenus, photos, logo et charte restent 100 % INOCEL. La palette du site de référence
+(`#083031` / `#61E5C0`) se trouvait être très proche de celle d'INOCEL
+(`#04201d` / `#4ac7b3`), l'adaptation a donc été directe.
+
+**Limite connue** : ce langage visuel repose beaucoup sur la photo studio. Les rendus 3D
+détourés du GEN-Z fonctionnent très bien, les photos de chantier moins. Un budget
+photo/vidéo serait le vrai levier pour atteindre le niveau de la référence.
+
+**Pour l'intégration** : les effets épinglés au scroll sont fragiles sous Elementor. Le JS
+doit vivre dans le thème enfant, pas dans un widget — à prévoir au chiffrage.
 
 ---
 
