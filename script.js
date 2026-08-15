@@ -1,5 +1,5 @@
 /* ============================================================
-   INOCEL — maquette page d'accueil
+   INOCEL — page d'accueil V3
    ============================================================ */
 
 const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -17,7 +17,7 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       outer.className = 'word';
       const inner = document.createElement('span');
       inner.textContent = w;
-      inner.style.setProperty('--d', 60 + i * 55 + 'ms');
+      inner.style.setProperty('--d', 80 + i * 70 + 'ms');
       outer.append(inner);
       el.append(outer, document.createTextNode(' '));
     });
@@ -28,14 +28,38 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 })();
 
 /* ------------------------------------------------------------
-   2. Gros paragraphe qui s'allume mot à mot au scroll
+   2. Révélation au scroll
+------------------------------------------------------------ */
+(function reveal() {
+  const targets = document.querySelectorAll('[data-reveal],[data-stagger]');
+  if (REDUCED || !('IntersectionObserver' in window)) {
+    targets.forEach(el => el.classList.add('is-in'));
+    return;
+  }
+  targets.forEach(el => {
+    if (el.dataset.delay) el.style.setProperty('--d', el.dataset.delay + 'ms');
+    if (el.hasAttribute('data-stagger')) {
+      [...el.children].forEach((c, i) => c.style.setProperty('--d', i * 95 + 'ms'));
+    }
+  });
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      e.target.classList.add('is-in');
+      io.unobserve(e.target);
+    });
+  }, { rootMargin: '0px 0px -10% 0px', threshold: 0.12 });
+  targets.forEach(el => io.observe(el));
+})();
+
+/* ------------------------------------------------------------
+   3. Texte qui s'allume mot à mot au scroll
 ------------------------------------------------------------ */
 (function highlightText() {
   const blocks = document.querySelectorAll('[data-highlight]');
   if (!blocks.length) return;
 
   const prepared = [];
-
   blocks.forEach(el => {
     const words = el.textContent.trim().split(/\s+/);
     el.textContent = '';
@@ -49,7 +73,6 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (REDUCED) { spans.forEach(s => s.classList.add('on')); return; }
     prepared.push({ el, spans });
   });
-
   if (!prepared.length) return;
 
   let ticking = false;
@@ -58,13 +81,46 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const vh = window.innerHeight;
     prepared.forEach(({ el, spans }) => {
       const r = el.getBoundingClientRect();
-      // 0 quand le bloc entre par le bas, 1 quand il a remonté au tiers haut
       const start = vh * 0.85;
-      const end = vh * 0.3;
+      const end = vh * 0.32;
       const p = (start - r.top) / (start - end);
       const cut = Math.round(Math.max(0, Math.min(1, p)) * spans.length);
       spans.forEach((s, i) => s.classList.toggle('on', i < cut));
     });
+  };
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(paint);
+  }, { passive: true });
+  window.addEventListener('resize', paint);
+  paint();
+})();
+
+/* ------------------------------------------------------------
+   4. Piste de progression verticale
+   La barre se remplit et le marqueur descend au fil du scroll
+   dans la section. On mesure la progression entre le moment où
+   le haut de la liste atteint le milieu de l'écran et celui où
+   son bas le dépasse.
+------------------------------------------------------------ */
+(function progressTrack() {
+  const track = document.querySelector('.track__in');
+  if (!track || REDUCED) return;
+
+  const rail = track.querySelector('.track__rail');
+  const items = track.querySelector('.track__items');
+  if (!rail || !items) return;
+
+  let ticking = false;
+  const paint = () => {
+    ticking = false;
+    const r = items.getBoundingClientRect();
+    const anchor = window.innerHeight * 0.55;
+    const total = r.height;
+    const done = anchor - r.top;
+    const p = Math.max(0, Math.min(1, done / total));
+    rail.style.setProperty('--fill', (p * 100).toFixed(2) + '%');
   };
 
   window.addEventListener('scroll', () => {
@@ -77,98 +133,162 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 })();
 
 /* ------------------------------------------------------------
-   3. Révélation au scroll
+   5. Vidéo de fond du hero (YouTube) + bouton pause
+   Le lecteur YouTube exige une origine valide : en file:// il
+   renvoie « Error 153 ». On n'injecte donc l'iframe que sur une
+   page servie en http/https ; sinon l'image de fond reste.
+   En production, c'est ici qu'on conditionne le chargement à
+   l'acceptation des cookies.
 ------------------------------------------------------------ */
-(function reveal() {
-  const targets = document.querySelectorAll('[data-reveal],[data-stagger]');
 
-  if (REDUCED || !('IntersectionObserver' in window)) {
-    targets.forEach(el => el.classList.add('is-in'));
+(function heroVideo() {
+  const hero = document.querySelector('.hero[data-yt]');
+  const toggle = document.getElementById('heroToggle');
+  if (!hero) return;
+
+  if (!/^https?:$/.test(window.location.protocol) || REDUCED) {
+    toggle?.remove();
     return;
   }
 
-  targets.forEach(el => {
-    if (el.dataset.delay) el.style.setProperty('--d', el.dataset.delay + 'ms');
-    if (el.hasAttribute('data-stagger')) {
-      [...el.children].forEach((c, i) => c.style.setProperty('--d', i * 95 + 'ms'));
-    }
+  const id = hero.dataset.yt;
+  const params = [
+    'autoplay=1', 'mute=1', 'loop=1', `playlist=${id}`,
+    'controls=0', 'disablekb=1', 'modestbranding=1',
+    'rel=0', 'playsinline=1', 'iv_load_policy=3', 'enablejsapi=1',
+  ].join('&');
+
+  const frame = document.createElement('iframe');
+  frame.className = 'hero__yt';
+  frame.title = 'INOCEL — GEN-Z 300';
+  frame.allow = 'autoplay; encrypted-media';
+  frame.setAttribute('tabindex', '-1');
+  frame.setAttribute('frameborder', '0');
+  frame.src = `https://www.youtube-nocookie.com/embed/${id}?${params}`;
+  hero.prepend(frame);
+
+  // pilotage via l'API postMessage de YouTube (pas de librairie à charger)
+  let paused = false;
+  const send = fn => frame.contentWindow?.postMessage(
+    JSON.stringify({ event: 'command', func: fn, args: [] }), '*'
+  );
+
+  toggle?.addEventListener('click', () => {
+    paused = !paused;
+    send(paused ? 'pauseVideo' : 'playVideo');
+    toggle.classList.toggle('is-paused', paused);
+    toggle.setAttribute('aria-label', paused ? 'Play background video' : 'Pause background video');
   });
-
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      e.target.classList.add('is-in');
-      io.unobserve(e.target);
-    });
-  }, { rootMargin: '0px 0px -12% 0px', threshold: 0.12 });
-
-  targets.forEach(el => io.observe(el));
 })();
 
 /* ------------------------------------------------------------
-   4. Compteurs à rouleau (odomètre)
+   6. Méga-menu : état aria + ouverture au clavier
+   Le survol est géré en CSS ; ici on tient aria-expanded à jour
+   et on permet d'ouvrir/fermer les panneaux au clavier.
 ------------------------------------------------------------ */
-(function odometers() {
-  const nodes = document.querySelectorAll('[data-odo]');
-  if (!nodes.length) return;
+(function megaMenu() {
+  const items = document.querySelectorAll('.nav__item');
+  if (!items.length) return;
 
-  nodes.forEach(node => {
-    const digits = String(node.dataset.odo).split('');
+  const closeAll = except => items.forEach(i => {
+    if (i === except) return;
+    i.classList.remove('is-open');
+    i.querySelector('.nav__link')?.setAttribute('aria-expanded', 'false');
+  });
 
-    if (REDUCED) { node.textContent = node.dataset.odo; return; }
+  items.forEach(item => {
+    const btn = item.querySelector('.nav__link');
+    if (!btn) return;
 
-    node.classList.add('odo');
-    digits.forEach((d, i) => {
-      const col = document.createElement('span');
-      col.className = 'odo__col';
-      col.style.setProperty('--d', i * 110 + 'ms');
-      // 0..9 puis le chiffre cible, pour finir sur un tour complet
-      for (let n = 0; n <= 9; n++) {
-        const s = document.createElement('span');
-        s.textContent = n;
-        col.append(s);
-      }
-      const last = document.createElement('span');
-      last.textContent = d;
-      col.append(last);
-      node.append(col);
-      col.dataset.target = 10; // index du dernier élément
+    btn.addEventListener('click', () => {
+      const open = !item.classList.contains('is-open');
+      closeAll(item);
+      item.classList.toggle('is-open', open);
+      btn.setAttribute('aria-expanded', String(open));
+    });
+
+    item.addEventListener('mouseenter', () => btn.setAttribute('aria-expanded', 'true'));
+    item.addEventListener('mouseleave', () => {
+      if (!item.classList.contains('is-open')) btn.setAttribute('aria-expanded', 'false');
     });
   });
 
-  if (REDUCED || !('IntersectionObserver' in window)) return;
-
-  const io = new IntersectionObserver(entries => {
-    entries.forEach(e => {
-      if (!e.isIntersecting) return;
-      e.target.querySelectorAll('.odo__col').forEach(col => {
-        col.style.transform = `translateY(-${col.dataset.target}em)`;
-      });
-      io.unobserve(e.target);
-    });
-  }, { threshold: 0.6 });
-
-  nodes.forEach(n => io.observe(n));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(null); });
+  document.addEventListener('click', e => { if (!e.target.closest('.nav__item')) closeAll(null); });
 })();
 
 /* ------------------------------------------------------------
-   5. Calculateur d'émissions
-   Hypothèses (à valider avec INOCEL) :
-   - groupe diesel : 0,25 L/kWh
-   - facteur d'émission gazole : 2,68 kg CO2 / L
-   - taux de charge moyen : 70 %
-   - voiture moyenne : 2,0 t CO2 / an
-   - camion-citerne : 30 000 L par livraison
+   7. Header : la ligne de coordonnées se replie au défilement
+   Elle réapparaît dès qu'on remonte, et toujours en haut de page.
+------------------------------------------------------------ */
+(function compactHeader() {
+  const nav = document.getElementById('nav');
+  if (!nav) return;
+
+  let last = window.scrollY;
+  let ticking = false;
+
+  const paint = () => {
+    ticking = false;
+    const y = window.scrollY;
+    if (y < 80) nav.classList.remove('is-compact');
+    else if (y > last + 4) nav.classList.add('is-compact');   // vers le bas
+    else if (y < last - 4) nav.classList.remove('is-compact'); // vers le haut
+    last = y;
+  };
+
+  window.addEventListener('scroll', () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(paint);
+  }, { passive: true });
+  paint();
+})();
+
+/* ------------------------------------------------------------
+   8. Onglets sectoriels
+   Un seul panneau visible à la fois. Les flèches gauche/droite
+   déplacent la sélection, comme attendu d'un tablist.
+------------------------------------------------------------ */
+(function sectorTabs() {
+  const bar = document.querySelector('.stabs__bar');
+  if (!bar) return;
+
+  const tabs = [...bar.querySelectorAll('.stab')];
+  const panels = [...document.querySelectorAll('.spanel')];
+
+  const select = i => {
+    tabs.forEach((t, k) => t.setAttribute('aria-selected', String(k === i)));
+    panels.forEach((p, k) => p.classList.toggle('is-on', k === i));
+  };
+
+  tabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => select(i));
+    tab.addEventListener('keydown', e => {
+      const dir = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0;
+      if (!dir) return;
+      e.preventDefault();
+      const next = (i + dir + tabs.length) % tabs.length;
+      select(next);
+      tabs[next].focus();
+    });
+  });
+})();
+
+/* ------------------------------------------------------------
+   9. Calculateur d'émissions (page dédiée)
+   Ne s'active que si le formulaire est présent, donc inerte
+   sur la page d'accueil.
+   Hypothèses (à faire valider par INOCEL) :
+   0,25 L/kWh · 2,68 kg CO2/L · 70 % de charge
+   2,0 t CO2 par voiture et par an · 30 000 L par camion-citerne
 ------------------------------------------------------------ */
 (function calculator() {
   const form = document.getElementById('calcForm');
   if (!form) return;
 
-  const L_PER_KWH = 0.25;
-  const KG_CO2_PER_L = 2.68;
-  const LOAD_FACTOR = 0.7;
-  const T_CO2_PER_CAR = 2.0;
-  const L_PER_TANKER = 30000;
+  const L_PER_KWH = 0.25, KG_CO2_PER_L = 2.68, LOAD = 0.7;
+  const T_CO2_PER_CAR = 2.0, L_PER_TANKER = 30000;
 
   const power = document.getElementById('power');
   const hours = document.getElementById('hours');
@@ -176,14 +296,14 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const inputs = [power, hours, days];
 
   const outs = {
-    diesel: document.getElementById('resDiesel'),
     co2: document.getElementById('resCo2'),
+    diesel: document.getElementById('resDiesel'),
     cars: document.getElementById('resCars'),
     truck: document.getElementById('resTruck'),
   };
 
   const nf = new Intl.NumberFormat('en-GB', { maximumFractionDigits: 0 });
-  const shown = { diesel: 0, co2: 0, cars: 0, truck: 0 };
+  const shown = { co2: 0, diesel: 0, cars: 0, truck: 0 };
   let raf = null;
 
   const paint = el => {
@@ -201,12 +321,8 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
       let moving = false;
       Object.keys(targets).forEach(k => {
         const diff = targets[k] - shown[k];
-        if (Math.abs(diff) > Math.max(targets[k] * 0.001, 0.5)) {
-          shown[k] += diff * 0.18;
-          moving = true;
-        } else {
-          shown[k] = targets[k];
-        }
+        if (Math.abs(diff) > Math.max(targets[k] * 0.001, 0.5)) { shown[k] += diff * 0.18; moving = true; }
+        else shown[k] = targets[k];
         outs[k].textContent = nf.format(shown[k]);
       });
       if (moving) raf = requestAnimationFrame(step);
@@ -217,86 +333,17 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   function update() {
     document.getElementById('powerOut').textContent = power.value + ' kVA';
     document.getElementById('hoursOut').textContent = hours.value + ' h';
-    document.getElementById('daysOut').textContent = days.value + ' days';
+    document.getElementById('daysOut').textContent = days.value + ' d';
     inputs.forEach(paint);
 
-    const kwh = power.value * 0.8 * LOAD_FACTOR * hours.value * days.value; // kVA → kW ≈ ×0,8
+    const kwh = power.value * 0.8 * LOAD * hours.value * days.value; // kVA → kW ≈ ×0,8
     const litres = kwh * L_PER_KWH;
     const tonnes = (litres * KG_CO2_PER_L) / 1000;
 
-    animateTo({
-      diesel: litres,
-      co2: tonnes,
-      cars: tonnes / T_CO2_PER_CAR,
-      truck: litres / L_PER_TANKER,
-    });
+    animateTo({ co2: tonnes, diesel: litres, cars: tonnes / T_CO2_PER_CAR, truck: litres / L_PER_TANKER });
   }
 
   inputs.forEach(el => el.addEventListener('input', update));
   inputs.forEach(paint);
-
-  if (!REDUCED && 'IntersectionObserver' in window) {
-    const io = new IntersectionObserver(entries => {
-      if (!entries[0].isIntersecting) return;
-      update();
-      io.disconnect();
-    }, { threshold: 0.25 });
-    io.observe(form);
-  } else {
-    update();
-  }
+  update();
 })();
-
-/* ------------------------------------------------------------
-   6. Header collé
------------------------------------------------------------- */
-(function stickyHeader() {
-  const header = document.getElementById('header');
-  if (!header) return;
-  const onScroll = () => header.classList.toggle('is-stuck', window.scrollY > 12);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
-})();
-
-/* ------------------------------------------------------------
-   7. Vidéo de fond du bandeau (YouTube)
-
-   Le lecteur YouTube exige une origine valide : chargé depuis un
-   fichier ouvert en direct (file://), il renvoie « Error 153 —
-   Video player configuration error ». On n'injecte donc l'iframe
-   que sur une page servie en http/https ; sinon l'image de fond
-   du bandeau reste affichée.
-
-   En production, c'est aussi le bon endroit pour conditionner le
-   chargement à l'acceptation des cookies.
------------------------------------------------------------- */
-(function bandVideo() {
-  const band = document.querySelector('.band[data-yt]');
-  if (!band) return;
-  if (!/^https?:$/.test(window.location.protocol)) return;
-
-  const id = band.dataset.yt;
-  const params = [
-    'autoplay=1', 'mute=1', 'loop=1', `playlist=${id}`,
-    'controls=0', 'disablekb=1', 'modestbranding=1',
-    'rel=0', 'playsinline=1', 'iv_load_policy=3',
-  ].join('&');
-
-  const frame = document.createElement('iframe');
-  frame.className = 'band__yt';
-  frame.title = 'INOCEL — GEN-Z 300';
-  frame.allow = 'autoplay; encrypted-media';
-  frame.setAttribute('tabindex', '-1');
-  frame.setAttribute('frameborder', '0');
-  frame.src = `https://www.youtube-nocookie.com/embed/${id}?${params}`;
-
-  band.prepend(frame); // avant le voile, qui doit rester au-dessus
-})();
-
-/* ------------------------------------------------------------
-   8. Formulaire (démo)
------------------------------------------------------------- */
-document.querySelector('.form')?.addEventListener('submit', e => {
-  e.preventDefault();
-  alert('Maquette — le formulaire sera branché sur HubSpot lors de l’intégration WordPress.');
-});

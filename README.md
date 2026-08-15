@@ -1,137 +1,95 @@
-# INOCEL — maquette nouvelle page d'accueil
+# INOCEL — maquette de refonte
 
-Maquette HTML statique, à valider **avant** intégration Elementor.
+Maquette HTML statique, à valider **avant** intégration WordPress / Elementor.
 
 ```bash
 cd refonte && python3 -m http.server 8099   # → http://localhost:8099
 ```
 
 > **Passer par cette adresse, pas par un double-clic sur `index.html`.** Ouverte en
-> `file://`, la page n'a pas d'origine : YouTube refuse de lire la vidéo du bandeau
-> (« Error 153 »). Le script détecte ce cas et laisse l'image de fond à la place, mais
-> la vidéo ne s'affiche que sur une page servie en http/https.
+> `file://`, la page n'a pas d'origine : YouTube refuse de lire la vidéo du hero
+> (« Error 153 »). Le script détecte ce cas et laisse l'image de fond à la place.
 
-| | |
+## Pages
+
+| Fichier | Rôle |
 |---|---|
-| Version actuelle | `index.html` — langage visuel inspiré de [forfuture.webflow.io](https://forfuture.webflow.io/homepage/home-b) |
-| Version précédente | `v1/index.html` — conservée pour comparaison |
-| Variante V3 | `v3/index.html` — mécaniques d'animation inspirées de [serverobotics.com](https://www.serverobotics.com/) |
+| `index.html` | Page d'accueil |
+| `calculator.html` | Calculateur d'émissions |
+| `sector-data-centers.html` | Page secteur, sert de gabarit aux cinq autres |
 
-`index.html` et `v1/` partagent `assets/` ; `v3/` a sa propre copie pour rester autonome.
+`style.css` et `script.js` sont partagés par les trois pages. Les visuels sont dans
+`assets/img/`, dont `_source/` qui conserve les fichiers d'origine des logos partenaires
+avant recadrage.
 
-### V3 : ce qui a été repris, et ce qui ne l'a pas été
-
-Le site de référence est un React Router/Remix maison avec Sanity : **aucune librairie
-d'animation** (ni GSAP, ni Lenis). Tout est écrit à la main, donc entièrement
-reproductible ici en JS/CSS natif.
-
-Repris — uniquement des **mécaniques**, jamais de contenu ni de visuel :
-
-| Effet | Où |
-|---|---|
-| Nav en pilule flottante à séparateurs | header |
-| Hero vidéo plein cadre + bouton pause | hero |
-| Texte qui s'allume mot à mot au scroll | section « statement » |
-| Image produit épinglée, texte qui défile à côté | section produit |
-| Piste de progression verticale + marqueur mobile | section bénéfices |
-| Boutons scindés (libellé + flèche) | partout |
-| Étiquettes entre parenthèses, crochets d'angle, halos flous | partout |
-
-Contenus, photos, logo et charte restent 100 % INOCEL. La palette du site de référence
-(`#083031` / `#61E5C0`) se trouvait être très proche de celle d'INOCEL
-(`#04201d` / `#4ac7b3`), l'adaptation a donc été directe.
-
-**Limite connue** : ce langage visuel repose beaucoup sur la photo studio. Les rendus 3D
-détourés du GEN-Z fonctionnent très bien, les photos de chantier moins. Un budget
-photo/vidéo serait le vrai levier pour atteindre le niveau de la référence.
-
-**Pour l'intégration** : les effets épinglés au scroll sont fragiles sous Elementor. Le JS
-doit vivre dans le thème enfant, pas dans un widget — à prévoir au chiffrage.
+Les variantes intermédiaires (v1, v2) ont été supprimées : seule cette version est
+maintenue.
 
 ---
 
 ## Design system
 
-Repris de ForFuture, avec les couleurs INOCEL.
+Charte INOCEL conservée, mise en page inspirée de
+[serverobotics.com](https://www.serverobotics.com/).
 
-| | ForFuture | Ici |
-|---|---|---|
-| Fond principal | `#fffdfa` | `#fcfbf9` (crème, plus de blanc pur) |
-| Fond secondaire | `#f5f2ef` | `#f4f2ee` |
-| Fond sombre | `#08100d` | `#04201d` (charte INOCEL) |
-| Accent | `#a6e00a` lime | `#4ac7b3` teal (charte INOCEL) |
-| Texte courant | `#3a413e` | `#4d5a63` (bleu-gris adouci, pas du noir) |
-| Titres | Instrument Sans **400** | Inter Tight **400** (charte) |
-| Boutons | pill, `r=64px` | pill, `r=999px` |
+| | Valeur |
+|---|---|
+| Titres | Inter Tight 400 |
+| Textes | Inter 400/500 |
+| Accent | `#4ac7b3` (survol `#009184`) |
+| Texte foncé | `#071a35` |
+| Fond sombre | `#04201d`, cartes en `#0e3a31` |
+| Fond clair | blanc, cartes en `#f5f4f0` et `#eae9e3` |
+| Vert clair | `#d9ece6` |
+| Jaune (CTA) | `#f5c95c` |
+| Rayon | 8 px |
+| Gouttière | 15 px |
 
-**Le changement de fond** : le blanc pur est remplacé par un crème. C'est discret mais
-c'est ce qui fait la différence entre « site corporate » et « site soigné ».
-
-**Le changement de graisse** : les titres passent de 500 à **400**, plus grands
-(jusqu'à 92 px) et plus serrés (`-0.035em`). Les gros titres légers, c'est la signature
-de ForFuture — la v1 était plus lourde et plus banale.
-
-**Les pastilles contournées** (`INTRODUCTION`, `SERVICE`…) remplacent les petits
-sur-titres teal de la v1. Elles structurent la page sans crier.
+**Le principe structurant** : chaque section est une carte encartée, jamais collée aux
+bords, avec alternance des fonds. Les sections secondaires (chiffres, value chain, CTA,
+carte, image pleine) sont limitées à 1360 px, les autres vont à 1410 px.
 
 ---
 
-## Structure
+## Structure de la page d'accueil
 
 | # | Section | Origine du texte |
 |---|---|---|
-| 1 | Barre utilitaire (événement + contacts) | home actuelle |
-| 2 | Header collant, méga-menus Solutions & Sectors | nouveau |
-| 3 | **Hero**, crème, centré, plafonné à 50 vh | home actuelle |
-| 4 | **Bandeau vidéo** pleine largeur, sans surimpression | nouveau |
-| 5 | **Chiffres clés**, 4 compteurs à rouleau | à fournir |
-| 6 | **Introduction**, paragraphe qui s'allume au scroll | home actuelle |
-| 7 | **Gamme produits** (sombre), lignes éditoriales | à fournir |
-| 8 | **Calculateur d'émissions** | nouveau |
-| 9 | **Secteurs**, 6 tuiles bento | home actuelle |
-| 10 | **Bénéfices 01/02/03** sur photo pleine largeur | home actuelle |
-| 11 | **Value chain solution** | home actuelle |
-| 12 | **GEN-Z features**, rendu 3D + attributs | home actuelle |
-| 13 | **Études de cas**, 3 tuiles portrait | à fournir |
-| 14 | Bandeau de confiance (défilement infini) | à fournir |
-| 15 | Actualités | à fournir |
-| 16 | **Formulaire de contact** sur photo | home actuelle |
-| 17 | Footer | home actuelle |
-
-« home actuelle » = texte repris tel quel de inocel.com. « à fournir » = contenu de
-remplissage écrit par mes soins, à remplacer avant mise en ligne (voir plus bas).
-
-### Ce que la home actuelle contient et que la nouvelle garde
-
-Hero, « INOCEL decarbonizes your operations », les trois bénéfices 01/02/03,
-GEN-Z features et ses attributs, Value chain solution, « Power generation for every
-industry », « Ready to power your growth? ». Rien n'a été perdu.
-
-### Ce que la nouvelle ajoute
-
-Barre de contacts permanente, méga-menus avec entrée Sectors, bandeau vidéo, chiffres
-clés, gamme produits explicite, calculateur d'émissions, études de cas chiffrées,
-preuves partenaires, actualités, formulaire complet sur la page.
+| 1 | Header deux lignes, méga-menu pleine largeur | nouveau |
+| 2 | Hero vidéo | home actuelle |
+| 3 | Déclaration qui s'allume au scroll | home actuelle |
+| 4 | Partenaires | logos réels + 2 à confirmer |
+| 5 | Secteurs en onglets | home actuelle |
+| 6 | Bandeau CTA jaune → calculateur | nouveau |
+| 7 | Produit épinglé | home actuelle |
+| 8 | Diesel vs GEN-Z | à valider |
+| 9 | Piste de progression (bénéfices 01/02/03) | home actuelle |
+| 10 | Value chain solution | home actuelle |
+| 11 | Études de cas | à fournir |
+| 12 | Zones desservies | à confirmer |
+| 13 | Location ou achat | à valider |
+| 14 | Visuel pleine largeur | — |
+| 15 | Contact | home actuelle |
 
 ---
 
 ## Animations
 
 `[data-reveal]` sur un élément, `[data-stagger]` sur un conteneur dont les enfants
-apparaissent en cascade, `[data-delay]` pour retarder. Un `IntersectionObserver`
-ajoute `.is-in` — chaque élément n'est animé qu'une fois.
+apparaissent en cascade, `[data-delay]` pour retarder. Un `IntersectionObserver` ajoute
+`.is-in` — chaque élément n'est animé qu'une fois.
 
-Trois effets repris de ForFuture :
+Aucune librairie : tout est en JS/CSS natif, comme sur le site de référence.
 
-- **Le paragraphe qui s'allume** (`[data-highlight]`) — les mots passent du gris clair au
-  navy au fil du scroll. C'est l'effet le plus identifiable du site de référence.
-- **Les compteurs à rouleau** (`[data-odo]`) — chaque chiffre est une colonne 0→9 qui
-  défile, avec un décalage par colonne.
-- **Les lignes produits** — la vignette est désaturée puis se colorise, la flèche pivote
-  et passe en teal au survol.
-
-Plus : titre du hero mot à mot, dézoom lent de la photo, marquee partenaires en pause au
-survol, rendu 3D en lévitation, résultats du calculateur interpolés.
+| Effet | Où |
+|---|---|
+| Titre découpé mot à mot | hero de chaque page |
+| Texte qui s'allume au scroll | déclaration de la home |
+| Image produit épinglée | section « Zero-emission power » |
+| Piste de progression verticale à marqueur mobile | section bénéfices |
+| Onglets sectoriels | section secteurs |
+| Header dont la ligne de contact se replie | toutes les pages |
+| Vidéo YouTube en fond avec bouton pause | hero de la home |
 
 Deux garde-fous : `prefers-reduced-motion: reduce` désactive tout, et les états de départ
 sont conditionnés à la classe `.js` — **sans JavaScript la page reste entièrement
@@ -139,46 +97,62 @@ lisible**, ce qui compte pour le SEO et pour l'intégration Elementor.
 
 ---
 
-## Choix de conversion (inchangés depuis la v1)
+## Choix de conversion
 
 Repris de GeoPura, le concurrent :
 
 1. **E-mail et téléphone visibles en permanence** — une partie des prospects B2B appelle.
 2. **Entrée « Sectors » dans le menu** — un DSI cherche « data center », pas
    « zero-emission generator ». Gain SEO et gain de conversion.
-3. **Deux CTA dans le hero** — « Let's talk » seul écarte ceux qui ne veulent pas encore
-   parler à un commercial.
-4. **Chiffres avant l'argumentaire** — 300 kVA / 0 g CO₂ / 25 ans CEA / 100 % européen.
-5. **Gamme produits explicite** — le site actuel ne dit jamais ce qui est achetable.
-6. **Calculateur d'émissions** ⭐ — la meilleure idée de GeoPura. Le visiteur repart avec
-   un chiffre, et une raison de laisser son e-mail.
-7. **Formulaire complet sur la home** — aujourd'hui elle renvoie vers `/contact`, et
-   chaque clic intermédiaire coûte des leads. Le formulaire demande secteur et puissance :
-   le commercial est briefé avant le premier appel.
-8. **Études de cas chiffrées** — « 412 t CO₂ évitées », « –68 dB ».
+3. **Secteurs placés haut dans la page** — le visiteur se reconnaît avant qu'on lui parle
+   de la machine.
+4. **Comparaison chiffrée avec le diesel** — tout le discours dit « remplacez votre groupe
+   diesel », le face-à-face rend l'argument vérifiable.
+5. **Calculateur d'émissions** — le visiteur repart avec un chiffre, et une raison de
+   laisser son e-mail.
+6. **Location ou achat** — deuxième question après « est-ce que ça marche », sur du
+   matériel à ce prix.
+7. **Études de cas chiffrées** — « 412 t CO₂ évitées », « –68 dB ».
 
 ---
 
 ## À trancher avant l'intégration
 
-- **Contenus fictifs à remplacer** : chiffres de l'introduction (40+ générateurs,
-  12 pays, 8 400 t), logos partenaires, specs GEN-Z 100, métriques des études de cas,
-  dates d'actualités, téléphone.
-- **GEN-Z 100** : le produit existe-t-il, ou faut-il ne présenter que la GEN-Z 300 et le
-  sur-mesure ?
-- **Hypothèses du calculateur** (0,25 L/kWh, 2,68 kg CO₂/L, 70 % de charge,
-  2 t CO₂/voiture/an) — validation technique nécessaire, c'est le chiffre que les
-  prospects retiendront.
-- **Consentement cookies** : le bandeau charge un iframe YouTube au chargement de la
-  page. Même en `youtube-nocookie.com`, il faut le conditionner à l'acceptation des
-  cookies côté WordPress (le site a déjà une Cookie Policy et un bandeau de consentement).
-  L'injection se fait dans `script.js` §7 — c'est le seul endroit à modifier.
-- **Fichier local devenu inutile** : `assets/video/gen-z.mp4` (40 Mo) n'est plus utilisé
-  que par `v1/`. À supprimer quand la v1 ne servira plus.
-- **Encart vidéo et modale supprimés** — ils faisaient doublon avec la vidéo de fond et
-  se superposaient à elle. Le code est récupérable dans `v1/` si besoin.
-- **Responsive non traité** : desktop uniquement pour l'instant. Les media queries de
-  `style.css` datent d'une version antérieure et ne couvrent plus le bandeau vidéo.
-- **6 pages sectorielles à créer** — elles n'existent pas encore.
-- **Menu mobile** : le bouton burger est présent mais non câblé (à faire en Elementor).
-- **Formulaire** : à brancher sur HubSpot (`inc/hubspot.php` existe déjà dans le thème).
+### Contenus inventés, à remplacer en priorité
+
+- **Autonomie et ravitaillement** (24 h par plein, moins de 2 h de ravitaillement) — mon
+  estimation, pas une donnée INOCEL. C'est l'information la plus décisive de la page et
+  celle que j'ai le moins de légitimité à produire.
+- **Colonne diesel du tableau comparatif** (≈ 160 t CO₂/an, 85–95 dB(A)) — calculée à
+  partir de la méthode indiquée sous le tableau, donc traçable, mais à valider.
+- **Chiffres des études de cas** (412 t, 68 000 L, –68 dB, 99,9 %) et **configuration type
+  de la page secteur** (2 à 4 unités, 12 à 24 mois) — exemples plausibles mais fictifs.
+  Comme la page secteur sert de gabarit aux cinq autres, une erreur s'y répliquerait.
+- **Liste de pays de la carte** et positions des pastilles — approximatives, calées à l'œil
+  sur `world-map.png` sans savoir ce que ses zones surlignées représentent.
+- **Téléphone** `+33 (0)4 00 00 00 00` — factice.
+
+### À confirmer
+
+- **Siège social** : j'ai mis Grenoble, déduit du logo Région Auvergne-Rhône-Alpes et de
+  la présence de `Grenoble.jpg` dans la médiathèque. L'usine reste à Belfort.
+- **France 2030 et Bpifrance** : ces deux partenariats sont une hypothèse de ma part. Les
+  logos sont en place mais à retirer si les relations n'existent pas. CEA et
+  Région / Union européenne viennent de votre médiathèque, donc sûrs.
+- **`PARTNERSHIP.jpg`** de la médiathèque n'a pas été ouvert — il contient peut-être la
+  liste officielle des partenaires.
+
+### Travaux restants
+
+- **Consentement cookies** : le hero charge un iframe YouTube au chargement. Même en
+  `youtube-nocookie.com`, il faut le conditionner à l'acceptation des cookies.
+  L'injection se fait dans `script.js` — c'est le seul endroit à modifier.
+- **Responsive non traité** : desktop uniquement, à la demande. Les media queries de
+  `style.css` datent d'une version antérieure et ne couvrent pas la structure actuelle.
+- **5 pages sectorielles à décliner** depuis `sector-data-centers.html`.
+- **Menu mobile** : le méga-menu n'a pas de version mobile.
+- **Formulaire de contact** : à brancher sur HubSpot (`inc/hubspot.php` existe déjà dans
+  le thème).
+- **En-tête et pied dupliqués** dans les trois fichiers : toute modification du méga-menu
+  est à reporter à la main. Limite d'une maquette statique, réglée par un template unique
+  sous WordPress.
