@@ -218,23 +218,35 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 })();
 
 /* ------------------------------------------------------------
-   7. Header : la ligne de coordonnées se replie au défilement
-   Elle réapparaît dès qu'on remonte, et toujours en haut de page.
+   7. Header : masqué au défilement vers le bas, rendu au retour
+   En bas de course il disparaît entièrement ; dès qu'on remonte
+   il revient, en version compacte (sans la ligne de coordonnées).
+   Celle-ci ne réapparaît qu'une fois revenu tout en haut.
 ------------------------------------------------------------ */
-(function compactHeader() {
+(function stickyHeader() {
   const nav = document.getElementById('nav');
   if (!nav) return;
 
+  const TOP = 80;      // zone haute : header entier
+  const SEUIL = 6;     // amplitude minimale pour éviter le tremblement
   let last = window.scrollY;
   let ticking = false;
 
   const paint = () => {
     ticking = false;
     const y = window.scrollY;
-    if (y < 80) nav.classList.remove('is-compact');
-    else if (y > last + 4) nav.classList.add('is-compact');   // vers le bas
-    else if (y < last - 4) nav.classList.remove('is-compact'); // vers le haut
-    last = y;
+    const delta = y - last;
+
+    if (y <= TOP) {
+      nav.classList.remove('is-hidden', 'is-compact');
+    } else if (delta > SEUIL) {
+      nav.classList.add('is-hidden', 'is-compact');
+    } else if (delta < -SEUIL) {
+      nav.classList.remove('is-hidden');
+      nav.classList.add('is-compact');
+    }
+
+    if (Math.abs(delta) > SEUIL) last = y;
   };
 
   window.addEventListener('scroll', () => {
@@ -346,4 +358,29 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   inputs.forEach(el => el.addEventListener('input', update));
   inputs.forEach(paint);
   update();
+})();
+
+/* ------------------------------------------------------------
+   10. Widget de chat (maquette)
+   Simple ouverture / fermeture de la carte. Le vrai widget sera
+   fourni par HubSpot ; ce bloc sera alors à supprimer.
+------------------------------------------------------------ */
+(function chatWidget() {
+  const chat = document.getElementById('chat');
+  const btn = document.getElementById('chatBtn');
+  const close = document.getElementById('chatClose');
+  if (!chat || !btn) return;
+
+  const setOpen = open => {
+    chat.classList.toggle('is-closed', !open);
+    btn.setAttribute('aria-expanded', String(open));
+  };
+
+  btn.addEventListener('click', () => setOpen(chat.classList.contains('is-closed')));
+  close?.addEventListener('click', () => setOpen(false));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !chat.classList.contains('is-closed')) setOpen(false);
+  });
+
+  setOpen(true); // ouvert au chargement, comme le widget de référence
 })();

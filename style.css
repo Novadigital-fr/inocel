@@ -83,7 +83,7 @@ p:last-child{margin-bottom:0}
    d'où le rétablissement ici pour les sections sans fond */
 .sec--bare{background:none;padding-left:0;padding-right:0;overflow:visible}
 /* carte qui ne prend pas toute la largeur */
-.sec--narrow{max-width:1360px;margin-left:auto;margin-right:auto}
+.sec--narrow{max-width:1460px;margin-left:auto;margin-right:auto}
 /* carte qui laisse déborder un visuel hors de ses limites */
 .sec--bleed{overflow:visible}
 
@@ -147,8 +147,12 @@ p:last-child{margin-bottom:0}
   position:sticky;top:var(--gutter);z-index:90;
   margin:var(--gutter) var(--gutter) var(--gap);
   background:var(--card-soft);border-radius:var(--r-sec);
+  transition:transform .38s var(--ease);
 }
-.nav__row{max-width:var(--wrap);margin:0 auto;padding:0 clamp(20px,2.4vw,36px);display:flex;align-items:center;justify-content:space-between;gap:24px}
+/* au défilement vers le bas le header sort complètement de l'écran ;
+   il revient dès qu'on remonte */
+.nav.is-hidden{transform:translateY(calc(-100% - var(--gutter) - 8px))}
+.nav__row{max-width:1460px;margin:0 auto;padding:0 clamp(20px,2.4vw,36px);display:flex;align-items:center;justify-content:space-between;gap:24px}
 .nav__row--top{
   height:46px;border-bottom:1px solid var(--line);font-size:13.5px;overflow:hidden;
   transition:height .3s var(--ease),opacity .25s var(--ease),border-color .3s;
@@ -190,7 +194,7 @@ p:last-child{margin-bottom:0}
 }
 .nav__item:hover .mega,.nav__item:focus-within .mega,.nav__item.is-open .mega{opacity:1;visibility:visible;transform:none}
 .mega__in{
-  max-width:var(--wrap);margin:0 auto;
+  max-width:1460px;margin:0 auto;
   padding:clamp(28px,3vw,44px) clamp(20px,2.4vw,36px);
   display:grid;grid-template-columns:1fr 1fr 400px;gap:clamp(28px,3vw,52px);
 }
@@ -227,7 +231,7 @@ p:last-child{margin-bottom:0}
   background:var(--teal);color:#fff;
   padding:16px clamp(20px,2.4vw,36px);
 }
-.mega__cta-in{max-width:var(--wrap);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.mega__cta-in{max-width:1460px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px}
 .mega__cta p{margin:0;font-size:15px;font-weight:500;display:flex;align-items:center;gap:10px}
 .mega__cta p svg{width:17px;height:17px}
 .mega__cta a{display:inline-flex;align-items:center;gap:12px;font-size:15px;font-weight:500}
@@ -330,9 +334,9 @@ p:last-child{margin-bottom:0}
 .track{padding-top:0}
 .track__sticky{
   position:sticky;top:0;z-index:3;text-align:center;pointer-events:none;
-  padding:calc(var(--pad-y) * .8) 0 26px;background:var(--card-mist);
+  padding:calc(var(--pad-y) * .8) 0 26px;background:#fff;
 }
-.track__sticky::after{content:'';position:absolute;left:0;right:0;top:100%;height:58px;background:linear-gradient(180deg,var(--card-mist),rgba(234,233,227,0))}
+.track__sticky::after{content:'';position:absolute;left:0;right:0;top:100%;height:58px;background:linear-gradient(180deg,#fff,rgba(255,255,255,0))}
 .track__in{position:relative;margin-top:clamp(20px,3vw,44px)}
 .track__rail{position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--line)}
 .track__fill{position:absolute;left:0;top:0;width:100%;height:var(--fill,0%);background:var(--teal);transition:height .1s linear}
@@ -405,7 +409,7 @@ p:last-child{margin-bottom:0}
    BANDEAU CTA — bloc teal, visuel qui déborde en haut
    ============================================================ */
 .ctaband{
-  margin:0 auto var(--gap);max-width:1360px;
+  margin:0 auto var(--gap);max-width:1240px;
   background:var(--amber);border-radius:var(--r-sec);
   padding:0 var(--pad-x);min-height:clamp(120px,13vw,168px);
   display:grid;grid-template-columns:1fr auto 1fr;gap:32px;align-items:center;
@@ -416,13 +420,20 @@ p:last-child{margin-bottom:0}
 .ctaband__media{position:relative;align-self:end;margin-top:clamp(-52px,-4vw,-24px)}
 .ctaband__media img{width:clamp(165px,19vw,268px)}
 .ctaband__act{justify-self:end}
+/* variante vert clair, pour le contact commercial.
+   Sans visuel au centre : deux colonnes, titre et bouton. */
+.ctaband--mint{background:var(--card-mint);grid-template-columns:1fr auto}
+.ctaband--mint h3{color:var(--forest);max-width:20ch}
 
 /* ============================================================
    IMAGE PLEINE — carte image avec filet et titre
    ============================================================ */
 .fullimg{
-  position:relative;margin:0 auto var(--gap);max-width:1360px;
+  position:relative;margin:0 auto var(--gap);max-width:1460px;
   border-radius:var(--r-sec);overflow:hidden;aspect-ratio:21/9;
+}
+.fullimg--tall{
+  aspect-ratio:auto;height:clamp(460px,52vw,720px);
 }
 .fullimg img{width:100%;height:100%;object-fit:cover}
 .fullimg__cap{
@@ -450,20 +461,54 @@ p:last-child{margin-bottom:0}
 
 /* ============================================================
    FOOTER
+   Marque et coordonnées à gauche, quatre colonnes de liens,
+   puis une bande d'engagements et la barre légale.
    ============================================================ */
-.footer{margin:0 var(--gutter) var(--gutter);background:var(--forest);border-radius:var(--r-sec);color:var(--body-lt);padding:clamp(48px,5vw,72px) var(--pad-x) 0}
-.footer__in{max-width:var(--wrap);margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:44px;padding-bottom:44px}
+.footer{
+  margin:0 var(--gutter) var(--gutter);background:var(--forest);
+  border-radius:var(--r-sec);color:var(--body-lt);
+  padding:clamp(48px,5vw,76px) var(--pad-x) 0;
+}
+.footer__in{
+  max-width:var(--wrap);margin:0 auto;
+  display:grid;grid-template-columns:1.5fr repeat(4,1fr);
+  gap:clamp(28px,3.4vw,52px);padding-bottom:clamp(40px,4.4vw,64px);
+}
 .footer__brand img{height:34px;width:auto;margin-bottom:18px}
-.footer__brand p{font-size:14px;max-width:30ch}
-.footer__label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.5);margin:0 0 14px}
-.footer__col{display:grid;gap:10px;align-content:start}
-.footer__col a{font-size:15px;color:rgba(255,255,255,.82);width:fit-content;transition:color .25s}
-.footer__col a:hover{color:var(--teal)}
-.footer__bottom{max-width:var(--wrap);margin:0 auto;display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;padding:20px 0 26px;border-top:1px solid var(--line-dk);font-size:13px;color:rgba(255,255,255,.5)}
-.footer__bottom p{margin:0}
-.footer__bottom a{margin-left:20px}
-.footer__bottom a:first-child{margin-left:0}
+.footer__brand p{font-size:14px;max-width:30ch;margin:0 0 24px}
+.footer__contact{margin:0;display:grid;gap:12px}
+.footer__contact div{display:flex;gap:14px;font-size:14px}
+.footer__contact dt{width:88px;flex:none;color:rgba(255,255,255,.45);font-size:12.5px;padding-top:1px}
+.footer__contact dd{margin:0;color:rgba(255,255,255,.88)}
+.footer__contact a:hover{color:var(--teal)}
 
+.footer__label{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin:0 0 16px}
+.footer__col{display:grid;gap:11px;align-content:start}
+.footer__col a{font-size:14.5px;color:rgba(255,255,255,.82);width:fit-content;transition:color .25s,transform .25s var(--ease)}
+.footer__col a:hover{color:var(--teal);transform:translateX(3px)}
+
+/* bande d'engagements */
+.footer__badges{
+  max-width:var(--wrap);margin:0 auto;padding:22px 0;
+  list-style:none;display:flex;flex-wrap:wrap;gap:14px clamp(28px,4vw,64px);
+  border-top:1px solid var(--line-dk);
+}
+.footer__badges li{display:flex;align-items:center;gap:10px;font-size:13.5px;color:rgba(255,255,255,.7)}
+.footer__badges svg{width:19px;height:19px;flex:none;color:var(--teal)}
+
+.footer__bottom{
+  max-width:var(--wrap);margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;
+  padding:20px 0 28px;border-top:1px solid var(--line-dk);
+  font-size:13px;color:rgba(255,255,255,.45);
+}
+.footer__bottom p{margin:0}
+.footer__social{display:flex;gap:18px}
+.footer__social a{color:rgba(255,255,255,.7);transition:color .25s}
+.footer__social a:hover{color:var(--teal)}
+.footer__legal a{margin-left:18px;transition:color .25s}
+.footer__legal a:first-child{margin-left:0}
+.footer__legal a:hover{color:#fff}
 
 /* ============================================================
    ÉTUDES DE CAS
@@ -576,22 +621,22 @@ p:last-child{margin-bottom:0}
 
 /* ============================================================
    MODÈLE COMMERCIAL
+   Titre en haut à gauche, puis trois cartes vert clair où le
+   titre reste en haut et le texte descend en pied de carte.
    ============================================================ */
-.offer__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,1.8vw,24px);margin-top:clamp(36px,4vw,60px)}
+.offer__head{max-width:16ch}
+.offer__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,1.8vw,26px);margin-top:clamp(40px,4.6vw,72px)}
 .ocard{
-  background:#fff;border:1px solid var(--line);border-radius:var(--r-card);
-  padding:clamp(24px,2.6vw,36px);display:flex;flex-direction:column;gap:16px;
-  transition:border-color .3s,transform .4s var(--ease);
+  background:var(--card-mint);border-radius:var(--r-card);
+  padding:clamp(26px,2.8vw,40px);
+  min-height:clamp(300px,30vw,420px);
+  display:flex;flex-direction:column;justify-content:space-between;
+  gap:clamp(48px,7vw,120px);
+  transition:transform .4s var(--ease);
 }
-.ocard:hover{border-color:var(--teal);transform:translateY(-4px)}
-.ocard__ico{width:38px;height:38px;border-radius:9px;display:grid;place-items:center;background:var(--card-mint);color:var(--teal-dk)}
-.ocard__ico svg{width:21px;height:21px}
-.ocard h3{font-size:22px}
-.ocard p{font-size:15px;margin:0;flex:1}
-.ocard ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
-.ocard li{position:relative;padding-left:20px;font-size:14px;color:var(--body)}
-.ocard li::before{content:'';position:absolute;left:0;top:8px;width:6px;height:6px;border-radius:50%;background:var(--teal)}
-
+.ocard:hover{transform:translateY(-4px)}
+.ocard h3{color:var(--forest);font-size:clamp(20px,2vw,28px);letter-spacing:-.025em}
+.ocard p{margin:0;font-size:14.5px;line-height:1.55;color:#2c4a42;max-width:34ch}
 
 /* ============================================================
    PAGES INTÉRIEURES
@@ -694,15 +739,71 @@ p:last-child{margin-bottom:0}
 .shero__copy p{font-size:16.5px;margin:0 0 24px}
 
 /* rangées image / texte alternées, décalées verticalement */
-.rows{display:grid;gap:clamp(48px,6vw,104px)}
-.rrow{display:grid;grid-template-columns:1fr 1fr;gap:clamp(32px,5vw,88px);align-items:center}
-.rrow--flip .rrow__media{order:-1}
-.rrow__media{border-radius:var(--r-card);overflow:hidden;aspect-ratio:16/11}
+/* titre centré au-dessus des rangées, même traitement que la piste */
+.rowshead{text-align:center;margin-bottom:clamp(48px,6vw,96px);display:grid;justify-items:center}
+.rowshead__p{margin:22px auto 0;font-size:16.5px;line-height:1.62;max-width:62ch}
+.rows{display:grid;gap:clamp(28px,3vw,52px);max-width:1180px;margin-inline:auto}
+/* par défaut l'image est à gauche ; .rrow--flip la renvoie à droite */
+.rrow{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,2.6vw,44px);align-items:center}
+.rrow .rrow__media{order:-1}
+.rrow--flip .rrow__media{order:0}
+.rrow__media{border-radius:var(--r-card);overflow:hidden;aspect-ratio:4/3}
 .rrow__media img{width:100%;height:100%;object-fit:cover;transition:transform .8s var(--ease)}
 .rrow:hover .rrow__media img{transform:scale(1.04)}
 .rrow__copy h4{margin-bottom:12px;font-size:20px}
 .rrow__copy p{font-size:16px;max-width:42ch}
 .rrow__copy p + p{margin-top:14px}
+
+
+/* ============================================================
+   WIDGET DE CHAT (maquette)
+   Aperçu visuel de ce que donnera le widget HubSpot une fois
+   branché : pastille en bas à droite et carte de message.
+   ============================================================ */
+.chat{position:fixed;right:24px;bottom:24px;z-index:120;display:grid;justify-items:end;gap:16px}
+.chat__btn{
+  width:64px;height:64px;border-radius:50%;display:grid;place-items:center;
+  background:var(--teal);color:#fff;
+  box-shadow:0 14px 30px -12px rgba(0,145,132,.75);
+  transition:transform .3s var(--ease),background .25s;
+}
+.chat__btn:hover{background:var(--teal-dk);transform:scale(1.06)}
+.chat__btn svg{width:26px;height:26px}
+
+.chat__card{
+  position:relative;width:min(330px,80vw);
+  background:#fff;border-radius:14px;
+  box-shadow:0 22px 48px -20px rgba(7,26,53,.4);
+  padding:44px 26px 24px;
+  transform-origin:bottom right;
+  transition:opacity .28s var(--ease),transform .28s var(--ease-out),visibility .28s;
+}
+.chat.is-closed .chat__card{opacity:0;visibility:hidden;transform:translateY(10px) scale(.96)}
+.chat__avatar{
+  position:absolute;top:-30px;left:50%;transform:translateX(-50%);
+  width:62px;height:62px;border-radius:50%;overflow:hidden;
+  border:3px solid #fff;background:var(--card-mint);
+  box-shadow:0 6px 16px -8px rgba(7,26,53,.4);
+}
+.chat__avatar img{width:100%;height:100%;object-fit:cover;object-position:50% 30%}
+.chat__close{
+  position:absolute;top:12px;right:12px;width:28px;height:28px;
+  display:grid;place-items:center;border-radius:50%;color:var(--body);
+  transition:background .25s,color .25s;
+}
+.chat__close:hover{background:var(--card-soft);color:var(--ink)}
+.chat__close svg{width:14px;height:14px}
+.chat__msg{
+  margin:0 0 16px;font-family:'Inter Tight',sans-serif;font-size:17px;
+  line-height:1.35;letter-spacing:-.02em;color:var(--ink);
+}
+.chat__sub{
+  margin:0;padding-top:14px;border-top:1px solid var(--line);
+  font-size:13.5px;color:var(--body);
+}
+@media (prefers-reduced-motion:reduce){
+  .chat__btn,.chat__card{transition:none}
+}
 
 /* ============================================================
    RESPONSIVE — non traité (desktop only)
