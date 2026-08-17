@@ -384,3 +384,29 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
   setOpen(true); // ouvert au chargement, comme le widget de référence
 })();
+
+/* ------------------------------------------------------------
+   11. Accordéon des enjeux
+   Comportement de FAQ : un clic ouvre ou referme le panneau,
+   sans jamais déplacer les éléments. Un seul ouvert à la fois.
+------------------------------------------------------------ */
+(function enjeux() {
+  const box = document.getElementById('enjeux');
+  if (!box) return;
+
+  const items = [...box.querySelectorAll('.eitem')];
+  items.forEach(item => {
+    const head = item.querySelector('.eitem__head');
+    head.addEventListener('click', () => {
+      const ouvrir = !item.classList.contains('is-on');
+      items.forEach(i => {
+        i.classList.remove('is-on');
+        i.querySelector('.eitem__head').setAttribute('aria-expanded', 'false');
+      });
+      if (ouvrir) {
+        item.classList.add('is-on');
+        head.setAttribute('aria-expanded', 'true');
+      }
+    });
+  });
+})();
