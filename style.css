@@ -363,6 +363,8 @@ p:last-child{margin-bottom:0}
 .feature__in{display:grid;grid-template-columns:1.25fr 1fr;gap:0;align-items:stretch;max-width:none}
 .feature__media{margin:clamp(16px,1.6vw,24px);border-radius:var(--r-card);overflow:hidden;background:#fff}
 .feature__media img{width:100%;height:100%;object-fit:cover}
+.feature__media--dark{background:var(--forest);display:grid;place-items:center;padding:clamp(12px,1.6vw,24px)}
+.feature__media--dark img{height:auto;object-fit:contain}
 .feature__copy{
   display:flex;flex-direction:column;justify-content:space-between;gap:clamp(28px,3.4vw,56px);
   padding:clamp(28px,3.2vw,48px) clamp(26px,3vw,44px);
@@ -436,11 +438,17 @@ p:last-child{margin-bottom:0}
   aspect-ratio:auto;height:clamp(460px,52vw,720px);
 }
 .fullimg img{width:100%;height:100%;object-fit:cover}
+.fullimg::before{
+  content:'';position:absolute;left:0;right:0;top:0;height:40%;z-index:1;
+  background:linear-gradient(180deg,rgba(4,32,29,.58),rgba(4,32,29,0));
+}
 .fullimg__cap{
-  position:absolute;left:clamp(24px,3vw,52px);right:clamp(24px,3vw,52px);top:clamp(24px,3vw,48px);
+  position:absolute;z-index:2;left:clamp(24px,3vw,52px);right:clamp(24px,3vw,52px);top:clamp(24px,3vw,48px);
   padding-top:18px;border-top:1px solid rgba(255,255,255,.5);
 }
 .fullimg__cap h3{color:#fff}
+
+
 
 /* ============================================================
    CONTACT
@@ -760,7 +768,8 @@ p:last-child{margin-bottom:0}
    Aperçu visuel de ce que donnera le widget HubSpot une fois
    branché : pastille en bas à droite et carte de message.
    ============================================================ */
-.chat{position:fixed;right:24px;bottom:24px;z-index:120;display:grid;justify-items:end;gap:16px}
+.chat{position:fixed;right:24px;bottom:24px;z-index:120;display:grid;justify-items:end;gap:16px;pointer-events:none}
+.chat > *{pointer-events:auto}
 .chat__btn{
   width:64px;height:64px;border-radius:50%;display:grid;place-items:center;
   background:var(--teal);color:#fff;
@@ -809,19 +818,6 @@ p:last-child{margin-bottom:0}
 /* cinq enjeux : la dernière carte occupe la largeur restante */
 .usecases--wide{grid-column:1 / -1}
 
-/* interlocuteurs types, en pied de section contact */
-.roles{
-  list-style:none;margin:clamp(32px,4vw,56px) 0 0;padding:0;
-  display:flex;flex-wrap:wrap;justify-content:center;gap:10px;max-width:64ch;
-}
-.roles li{
-  padding:8px 16px;border-radius:var(--r-pill);
-  border:1px solid var(--line-dk);font-size:13.5px;color:rgba(255,255,255,.78);
-  transition:border-color .3s,color .3s;
-}
-.roles li:hover{border-color:var(--teal);color:#fff}
-
-
 /* ============================================================
    ENJEUX — accordéon
    Image à gauche ; à droite l'élément ouvert se place en haut,
@@ -866,6 +862,39 @@ p:last-child{margin-bottom:0}
 @media (prefers-reduced-motion:reduce){
   .eitem__body,.eitem__body > p,.eitem__sign::before,.eitem__sign::after{transition:none}
 }
+
+
+/* ============================================================
+   GAMME PRODUITS
+   Titre, filet à flèche, puis trois cartes décalées en cascade.
+   Les rendus étant détourés, les cartes ont un fond clair plutôt
+   qu'une photo pleine avec dégradé.
+   ============================================================ */
+.prod__head{max-width:16ch}
+.prod__rule{
+  display:grid;grid-template-columns:auto 1fr minmax(280px,42ch);
+  gap:clamp(24px,4vw,64px);align-items:start;
+  margin-top:clamp(32px,4vw,56px);padding-top:22px;border-top:1px solid var(--line);
+}
+.prod__arrow{width:22px;height:22px;color:var(--ink)}
+.prod__p{font-size:16px;margin:0}
+
+.prod__grid{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(16px,2vw,28px);margin-top:clamp(48px,6vw,88px);align-items:start}
+/* décalage progressif, comme sur la référence */
+.pcard:nth-child(2){margin-top:clamp(28px,4vw,64px)}
+.pcard:nth-child(3){margin-top:clamp(56px,8vw,128px)}
+.pcard{
+  display:grid;gap:18px;border-radius:var(--r-card);
+  background:var(--card-soft);padding:clamp(20px,2.4vw,32px);
+  transition:transform .45s var(--ease),background .35s;
+}
+.pcard:hover{transform:translateY(-6px);background:var(--card-mint)}
+.pcard__media{display:grid;place-items:center;aspect-ratio:16/10}
+.pcard__media img{max-width:100%;max-height:100%;object-fit:contain;transition:transform .6s var(--ease)}
+.pcard:hover .pcard__media img{transform:scale(1.05)}
+.pcard__cap{display:grid;gap:4px}
+.pcard__cap strong{font-family:'Inter Tight',sans-serif;font-size:clamp(19px,1.9vw,24px);font-weight:400;letter-spacing:-.025em;color:var(--ink)}
+.pcard__cap em{font-style:normal;font-size:13.5px;line-height:1.5;color:var(--body)}
 
 /* ============================================================
    RESPONSIVE — non traité (desktop only)

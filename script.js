@@ -382,7 +382,8 @@ const REDUCED = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (e.key === 'Escape' && !chat.classList.contains('is-closed')) setOpen(false);
   });
 
-  setOpen(true); // ouvert au chargement, comme le widget de référence
+  // la carte peut recouvrir un CTA selon la page : celle-ci décide
+  setOpen(chat.dataset.chat !== 'closed'); // ouvert au chargement, comme le widget de référence
 })();
 
 /* ------------------------------------------------------------
